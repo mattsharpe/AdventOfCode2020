@@ -49,18 +49,27 @@ namespace Advent2020.Tests
             Assert.AreEqual(454, result);
         }
 
+        [DataTestMethod]
+        [DataRow("1-3 a: abcde", true)]
+        [DataRow("1-3 b: cdefg", false)]
+        [DataRow("2-9 c: ccccccccc", false)]
+        public void ValidatePasswordsWithProperPolicy(string line, bool expected)
+        {
+            Assert.AreEqual(expected, _day02.ValidatePasswordAgainstOfficialTobogganCorporatePolicy(line));
+        }
+
         [TestMethod]
         public void Part2Sample()
         {
-            
+            var result = _day02.CountValidPasswords(_sample, true);
+            Assert.AreEqual(1, result);
         }
 
         [TestMethod]
         public void Part2()
         {
-            
+            var result = _day02.CountValidPasswords(_input, true);
+            Assert.AreEqual(649, result);
         }
     }
-
-
 }
