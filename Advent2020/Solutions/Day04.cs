@@ -11,7 +11,7 @@ namespace Advent2020.Solutions
         private IEnumerable<Passport> Parse(string input)
         {
             return input.Split(new[] {"\r\n\r\n"}, StringSplitOptions.RemoveEmptyEntries)
-                .Select(x => x.Split(new[] {" ", Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries)
+                .Select(x => x.Split(new[] {" ", "\r\n"}, StringSplitOptions.RemoveEmptyEntries)
                     .Select(entry => entry.Split(':'))
                     .ToDictionary(kvp => kvp[0], kvp => kvp[1]));
         }
