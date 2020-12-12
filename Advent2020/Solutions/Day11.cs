@@ -10,7 +10,7 @@ namespace Advent2020.Solutions
 
         private char[,] _map;
 
-        public void Stabilise(string[] input)
+        public void Stabilise(string[] input, bool part2 = false)
         {
             ParseInput(input);
             //PrintMap();
@@ -18,18 +18,21 @@ namespace Advent2020.Solutions
 
             while (true)
             {
-                TakeTurn();
+                if (part2)
+                {
+                    TakeTurn(CountVisibleOccupiedSeats, 5);
+                    //PrintMap();
+                }
+                else
+                {
+                    TakeTurn(CountAdjacentOccupiedSeats, 4);
+                }
+                
                 if (OccupiedSeats == previous)
                     break;
 
                 previous = OccupiedSeats;
             }
-            
-            //foreach (var i in Enumerable.Range(0,10))
-            //{
-            //    TakeTurn();
-            //    PrintMap();
-            //}
         }
 
         int CountAdjacentOccupiedSeats(int x, int y)
@@ -53,7 +56,40 @@ namespace Advent2020.Solutions
             return result;
         }
 
-        void TakeTurn()
+        int CountVisibleOccupiedSeats(int x, int y)
+        {
+            var offsets = new List<(int x, int y)>
+            {
+                (-1, -1), (-1, 0), (-1, 1),
+                (0, -1), (0, 1),
+                (1, -1), (1, 0), (1, 1)
+            };
+
+            var result = offsets.Count(offset =>
+            {
+                var newX = offset.x + x;
+                var newY = offset.y + y;
+                if (newX < _map.GetLowerBound(0) || newX > _map.GetUpperBound(0) ||
+                    newY < _map.GetLowerBound(1) || newY > _map.GetUpperBound(1)) return false;
+
+                while (_map[newX, newY] == '.')
+                {
+                    newX += offset.x;
+                    newY += offset.y;
+
+                    if (newX < _map.GetLowerBound(0) || newX > _map.GetUpperBound(0) ||
+                        newY < _map.GetLowerBound(1) || newY > _map.GetUpperBound(1)) 
+                        return false;
+                }
+
+
+                return _map[newX, newY] == '#';
+            });
+
+            return result;
+        }
+
+        private void TakeTurn(Func<int, int, int> countOccupiedSeats, int tolerance)
         {
             var newSeats = new char[_map.GetUpperBound(0)+1, _map.GetUpperBound(1)+1];
             for (var y = 0; y <= _map.GetUpperBound(1); y++)
@@ -61,20 +97,19 @@ namespace Advent2020.Solutions
                 for (var x = 0; x <= _map.GetUpperBound(0); x++)
                 {
                     var current = _map[x, y];
-                    var occupiedSeats = CountAdjacentOccupiedSeats(x, y);
-                    if (current == 'L' && occupiedSeats == 0)
+                    var occupiedSeats = countOccupiedSeats(x, y);
+                    switch (current)
                     {
-                        newSeats[x, y] = '#';
-                        continue;
+                        case 'L' when occupiedSeats == 0:
+                            newSeats[x, y] = '#';
+                            continue;
+                        case '#' when occupiedSeats >= tolerance:
+                            newSeats[x, y] = 'L';
+                            continue;
+                        default:
+                            newSeats[x, y] = _map[x,y];
+                            break;
                     }
-
-                    if (current == '#' && occupiedSeats >= 4)
-                    {
-                        newSeats[x, y] = 'L';
-                        continue;
-                    }
-
-                    newSeats[x, y] = _map[x,y];
                 }
             }
 
@@ -108,6 +143,5 @@ namespace Advent2020.Solutions
                 Console.WriteLine();
             }
         }
-
     }
 }

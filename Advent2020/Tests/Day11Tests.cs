@@ -50,5 +50,25 @@ namespace Advent2020.Tests
 
             Assert.AreEqual(2265, result);
         }
+
+        [TestMethod]
+        public void VisibleSeatsSample()
+        {
+            _day11.Stabilise(_shortSample, true);
+
+            var result = _day11.OccupiedSeats;
+
+            Assert.AreEqual(26, result);
+        }
+
+        [TestMethod]
+        public void VisibleSeats()
+        {
+            _day11.Stabilise(Input, true);
+
+            var result = _day11.OccupiedSeats;
+
+            Assert.AreEqual(2045, result);
+        }
     }
 }
