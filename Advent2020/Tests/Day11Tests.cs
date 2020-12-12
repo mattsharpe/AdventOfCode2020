@@ -9,7 +9,7 @@ namespace Advent2020.Tests
     {
         private Day11 _day11;
 
-        private string[] Input => File.ReadAllLines("Input/Day10.txt");
+        private string[] Input => File.ReadAllLines("Input/Day11.txt");
         private readonly string[] _shortSample =
         {
             "L.LL.LL.LL",
@@ -34,11 +34,21 @@ namespace Advent2020.Tests
         public void TakenSeatsWithSample()
         {
             _day11.Stabilise(_shortSample);
-            _day11.PrintMap();
 
             var result = _day11.OccupiedSeats;
 
             Assert.AreEqual(37, result);
+        }
+
+        
+        [TestMethod]
+        public void TakenSeats()
+        {
+            _day11.Stabilise(Input);
+
+            var result = _day11.OccupiedSeats;
+
+            Assert.AreEqual(2265, result);
         }
     }
 }

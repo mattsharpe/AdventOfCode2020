@@ -1,23 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Advent2020.Solutions
 {
     class Day11
     {
-        public int OccupiedSeats { get; set; }
+        public int OccupiedSeats => _map.Cast<char>().Count(seat => seat == '#');
+
         private char[,] _map;
 
         public void Stabilise(string[] input)
         {
             ParseInput(input);
+            //PrintMap();
+            var previous = OccupiedSeats;
 
-            TakeTurn();
-           
+            while (true)
+            {
+                TakeTurn();
+                if (OccupiedSeats == previous)
+                    break;
 
+                previous = OccupiedSeats;
+            }
             
+            //foreach (var i in Enumerable.Range(0,10))
+            //{
+            //    TakeTurn();
+            //    PrintMap();
+            //}
         }
 
         int CountAdjacentOccupiedSeats(int x, int y)
@@ -43,7 +55,7 @@ namespace Advent2020.Solutions
 
         void TakeTurn()
         {
-            var newSeats = new char[_map.GetUpperBound(0), _map.GetUpperBound(1)];
+            var newSeats = new char[_map.GetUpperBound(0)+1, _map.GetUpperBound(1)+1];
             for (var y = 0; y <= _map.GetUpperBound(1); y++)
             {
                 for (var x = 0; x <= _map.GetUpperBound(0); x++)
@@ -52,7 +64,14 @@ namespace Advent2020.Solutions
                     var occupiedSeats = CountAdjacentOccupiedSeats(x, y);
                     if (current == 'L' && occupiedSeats == 0)
                     {
+                        newSeats[x, y] = '#';
+                        continue;
+                    }
+
+                    if (current == '#' && occupiedSeats >= 4)
+                    {
                         newSeats[x, y] = 'L';
+                        continue;
                     }
 
                     newSeats[x, y] = _map[x,y];
@@ -76,8 +95,10 @@ namespace Advent2020.Solutions
             }
         }
 
+
         public void PrintMap()
         {
+            Console.WriteLine($"-- {OccupiedSeats} --------------------------------");
             for (var y = 0; y <= _map.GetUpperBound(1); y++)
             {
                 for (var x = 0; x <= _map.GetUpperBound(0); x++)
