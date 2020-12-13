@@ -12,7 +12,7 @@ namespace Advent2020.Solutions
 
             Console.WriteLine(buses.Count);
 
-            bool found = false;
+            var found = false;
             var currentTime = startTime;
             while (!found)
             {
@@ -24,5 +24,29 @@ namespace Advent2020.Solutions
             return  bus * (currentTime - startTime);
 
         }
+
+        public long EarliestTimestampForLinedUpDepartures(string timetable)
+        {
+            var buses = timetable.Split(",");
+            var time = 0L;
+            var busTime = long.Parse(buses[0]);
+
+            //loop through the bus times and increment he current time in jumps
+            for (var i = 1; i < buses.Length; i++)
+            {
+                if (buses[i].Equals("x")) continue;
+
+                var nextBusDeparture = int.Parse(buses[i]);
+                while ((time + i) % nextBusDeparture != 0)
+                {
+                    //jump the time up in increments until we hit a valid bus time (mod 0)
+                    time += busTime;
+                }
+                //big jump to prevent counting all the numbers in the universe
+                busTime *= nextBusDeparture;
+            }
+            return time;
+        }
+
     }
 }
