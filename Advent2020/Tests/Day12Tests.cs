@@ -50,7 +50,7 @@ namespace Advent2020.Tests
         public void MovingWayPoint()
         {
             var result = _day12.MovingWayPoint(Input);
-            Assert.AreEqual(820, result);
+            Assert.AreEqual(66614, result);
         }
     }
 }

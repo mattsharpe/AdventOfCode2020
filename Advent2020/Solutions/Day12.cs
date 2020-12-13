@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Advent2020.Solutions
 {
@@ -63,52 +64,31 @@ namespace Advent2020.Solutions
             {
                 var command = instruction.Substring(0, 1);
                 var magnitude = int.Parse(instruction.Split(command).Last());
-                Console.WriteLine(instruction);
-                switch (command)
-                {
-                    case "F":
-                        state.x += (state.waypointX * magnitude);
-                        state.y += (state.waypointY * magnitude);
-                        break;
-                    case "N":
-                        state.waypointY += magnitude;
-                        break;
-                    case "S":
-                        state.waypointY -= magnitude;
-                        break;
-                    case "E":
-                        state.waypointX += magnitude;
-                        break;
-                    case "W":
-                        state.waypointX -= magnitude;
-                        break;
-                    case "R":
-                        var (newX, newY) = Rotate(state.waypointX, state.waypointY, magnitude / 90);
-                        state.waypointX = newX;
-                        state.waypointY = newY;
-                        break;
-                    case "L":
-                        var leftResult= Rotate(state.waypointX, state.waypointY, 4 - magnitude / 90);
-                        state.waypointX = leftResult.newX;
-                        state.waypointY = leftResult.newY;
-                        break;
-                    default:
-                        throw new ArgumentException($"Unknown instruction {command}");
-                }
 
-                Console.WriteLine(state);
+                state = command switch
+                {
+                    "F" => (state.x + state.waypointX * magnitude, state.y + state.waypointY * magnitude, state.waypointX, state.waypointY ),
+                    "N" => (state.x, state.y, state.waypointX, state.waypointY + magnitude),
+                    "S" => (state.x, state.y, state.waypointX, state.waypointY - magnitude),
+                    "E" => (state.x, state.y, state.waypointX + magnitude, state.waypointY),
+                    "W" => (state.x, state.y, state.waypointX - magnitude, state.waypointY),
+                    "R" => Rotate(state, magnitude / 90),
+                    "L" => Rotate(state, 4 - magnitude / 90),
+                    _ =>  throw new ArgumentException($"Unknown instruction {command}")
+                };
             }
             
             return Math.Abs(state.x) + Math.Abs(state.y);
         }
 
-        (int newX, int newY) Rotate(int x, int y, int quadrants) =>
+        private (int x, int y, int waypointX, int waypointY) Rotate((int x, int y, int waypointX, int waypointY) state, int quadrants) => 
             quadrants switch
-            {
-                0 => (x, y),
-                1 => (y, -x),
-                2 => (-x, -y),
-                3 => (-y, x),
+        {
+            0 => (state.x, state.y, state.waypointX, state.waypointY),
+            1 => (state.x, state.y, state.waypointY, -state.waypointX),
+            2 => (state.x, state.y, -state.waypointX, -state.waypointY),
+            3 => (state.x, state.y, -state.waypointY, state.waypointX),
+            _ => throw new ArgumentException($"Unexpected rotation {quadrants}")
             };
 
     }
