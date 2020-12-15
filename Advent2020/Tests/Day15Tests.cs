@@ -8,8 +8,8 @@ namespace Advent2020.Tests
     {
         private Day15 _day15;
 
-        private int[] _sample = {0, 3, 6};
-        private int[] _input = {8, 13, 1, 0, 18, 9};
+        private readonly int[] _sample = {0, 3, 6};
+        private readonly int[] _input = {8, 13, 1, 0, 18, 9};
 
         [TestInitialize]
         public void Initialize()
@@ -51,7 +51,7 @@ namespace Advent2020.Tests
         [DataRow(new[] { 2, 3, 1 }, 6895259)]
         [DataRow(new[] { 3, 2, 1 }, 18)]
         [DataRow(new[] { 3, 1, 2 }, 362)]
-        public void RunToThirtyMillionTestCases(int[] numbers, int expected)
+        private void RunToThirtyMillionTestCases(int[] numbers, int expected)
         {
             var result = _day15.RunUntilTargetNumber(numbers, 30_000_000);
             Assert.AreEqual(expected, result);
