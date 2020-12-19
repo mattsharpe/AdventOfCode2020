@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
 
@@ -18,6 +17,7 @@ namespace Advent2020.Solutions
             }
 
             Console.WriteLine("Active cells in hashset: " + active.Count);
+
             return active.Count;
         }
 
@@ -37,7 +37,6 @@ namespace Advent2020.Solutions
                 Console.WriteLine();
             }
         }
-
 
         public IEnumerable<Vector4> NeighboursOf3D(Vector4 point)
         {
@@ -63,21 +62,37 @@ namespace Advent2020.Solutions
         public HashSet<Vector4> ProcessCycle(HashSet<Vector4> active, bool fourDimensions)
         {
             var getNeighbours = fourDimensions ? (Func<Vector4, IEnumerable<Vector4>>) NeighboursOf4D : NeighboursOf3D;
+
             var nextActive = new HashSet<Vector4>();
+            var inactive = new Dictionary<Vector4, int>();
 
-            var toExplore = active.SelectMany(x => getNeighbours(x));
-
-            foreach (var cell in toExplore)
+            foreach (var point in active) 
             {
-                var neighbours = getNeighbours(cell);
-                var countOfActive = neighbours.Count(active.Contains);
-                var isActive = active.Contains(cell);
-                if (isActive ? countOfActive == 2 || countOfActive == 3 : countOfActive == 3)
+                var currentActiveNeighbours = 0;
+
+                foreach (var neighbour in getNeighbours(point))
                 {
-                    nextActive.Add(cell);
+                    if (active.Contains(neighbour))
+                    {
+                        currentActiveNeighbours++;
+                    }
+                    else
+                    {
+                        inactive[neighbour] = inactive.GetValueOrDefault(neighbour) + 1;
+                    }
+                }
+
+                if (currentActiveNeighbours == 2 || currentActiveNeighbours == 3) 
+                {
+                    nextActive.Add(point);
                 }
             }
-            
+
+            foreach (var x in inactive.Where(x => x.Value == 3))
+            {
+                nextActive.Add(x.Key);
+            }
+
             return nextActive;
         }
 
