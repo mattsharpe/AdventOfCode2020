@@ -45,17 +45,17 @@ namespace Advent2020.Tests
         }
 
         [TestMethod]
-        private void SampleIn4DWith6Generations()
+        public void SampleIn4DWith6Generations()
         {
             var result = _day17.ActiveCubesAfterIterations(_sample, 6, true);
             Assert.AreEqual(848,result);
         }
 
         [TestMethod]
-        private void RunIn4DWith6Generations()
+        public void RunIn4DWith6Generations()
         {
             var result = _day17.ActiveCubesAfterIterations(Input, 6, true);
-            Assert.AreEqual(848,result);
+            Assert.AreEqual(1492,result);
         }
     }
 }

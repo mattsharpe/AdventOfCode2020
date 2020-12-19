@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
 
@@ -9,17 +10,15 @@ namespace Advent2020.Solutions
     {
         public int ActiveCubesAfterIterations(string[] input, int generations, bool fourDimensions = false)
         {
-            var parsed = ParseInput(input);
-            var map = parsed.Item1;
-            Console.WriteLine(parsed.Item2.Count);
+            var active = ParseInput(input);
             
             for (var i = 0; i < generations; i++)
             {
-                map = ProcessCycle(map, fourDimensions);
+                active =  ProcessCycle(active, fourDimensions);
             }
 
-            Console.WriteLine(_count);
-            return map.Count(x => x.Value);
+            Console.WriteLine("Active cells in hashset: " + active.Count);
+            return active.Count;
         }
 
         private void PrintMap(Dictionary<Vector4, bool> map)
@@ -61,37 +60,36 @@ namespace Advent2020.Solutions
                 select result;
         }
 
-        private static int _count = 0;
-        public Dictionary<Vector4, bool> ProcessCycle(Dictionary<Vector4, bool> map, bool fourDimensions)
+        public HashSet<Vector4> ProcessCycle(HashSet<Vector4> active, bool fourDimensions)
         {
-            Func<Vector4, IEnumerable<Vector4>> getNeighbours;
-            getNeighbours = fourDimensions ? (Func<Vector4, IEnumerable<Vector4>>) NeighboursOf4D : NeighboursOf3D;
-            var nextState = new Dictionary<Vector4, bool>();
-            var toExplore = map.SelectMany(x => getNeighbours(x.Key));
+            var getNeighbours = fourDimensions ? (Func<Vector4, IEnumerable<Vector4>>) NeighboursOf4D : NeighboursOf3D;
+            var nextActive = new HashSet<Vector4>();
+
+            var toExplore = active.SelectMany(x => getNeighbours(x));
 
             foreach (var cell in toExplore)
             {
                 var neighbours = getNeighbours(cell);
-                var countOfActive = neighbours.Count(x => map.ContainsKey(x) && map[x]);
-                map.TryGetValue(cell, out var value);
-                nextState[cell] = value ? countOfActive == 2 || countOfActive == 3 : countOfActive == 3;
-                _count++;
+                var countOfActive = neighbours.Count(active.Contains);
+                var isActive = active.Contains(cell);
+                if (isActive ? countOfActive == 2 || countOfActive == 3 : countOfActive == 3)
+                {
+                    nextActive.Add(cell);
+                }
             }
-
-            return nextState;
+            
+            return nextActive;
         }
 
-        private (Dictionary<Vector4, bool>, HashSet<Vector4>) ParseInput(string[] input)
+        private HashSet<Vector4> ParseInput(string[] input)
         {
             var active = new HashSet<Vector4>();
-            var map = new Dictionary<Vector4, bool>();
 
             var currentPoint = new Vector4(0,0,0,0);
             foreach (var line in input)
             {
                 foreach (var character in line)
                 {
-                    map.Add(currentPoint, character =='#');
                     if (character == '#')
                     {
                         active.Add(currentPoint);
@@ -102,7 +100,7 @@ namespace Advent2020.Solutions
                 currentPoint.Y++;
             }
 
-            return (map, active);
+            return active;
         }
     }
 }
