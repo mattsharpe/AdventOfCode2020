@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
+﻿using System.IO;
 using Advent2020.Solutions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -31,6 +27,7 @@ namespace Advent2020.Tests
 
 
         private string[] Input => File.ReadAllLines("Input/Day19.txt");
+        private string[] Sample2 => File.ReadAllLines("Input/Day19Sample.txt");
 
         [TestInitialize]
         public void Initialize()
@@ -46,10 +43,31 @@ namespace Advent2020.Tests
         }
 
         [TestMethod]
-        public void MessagesMatchingRule0()
+        public void MessagesMatchingRule()
         {
             var result = _day19.MessagesMatchingRule(Input);
             Assert.AreEqual(173, result);
+        }
+
+        [TestMethod]
+        public void MessagesMatchingRuleWithLoops()
+        {
+            var result = _day19.MessagesMatchingRule(Sample2);
+            Assert.AreEqual(3, result);
+        }
+
+        [TestMethod]
+        public void MessagesMatchingRuleWithLoopsUpdatedRulesSample()
+        {
+            var result = _day19.MessagesMatchingRulePatchRules(Sample2);
+            Assert.AreEqual(12, result);
+        }
+
+        [TestMethod]
+        public void MessagesMatchingRuleWithLoopsUpdatedRules()
+        {
+            var result = _day19.MessagesMatchingRulePatchRules(Input);
+            Assert.AreEqual(367, result);
         }
     }
 }
