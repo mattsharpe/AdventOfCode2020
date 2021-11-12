@@ -147,10 +147,21 @@ Tile 3079:
             Assert.AreEqual("...#.##..#", tile.Right);
         }
 
+
+        [TestMethod]
+        public void Part1_Sample()
+        {
+            var result = _day20.CountCorners(_sample);
+            Assert.AreEqual(20899048083289, result);
+        }
+
         [TestMethod]
         public void Part1()
         {
-            _day20.ParseInput(File.ReadAllText("Input/Day20.txt"));
+            var result = _day20.CountCorners(File.ReadAllText("Input/Day20.txt"));
+            Assert.AreEqual(13983397496713, result);
         }
+
+
     }
 }
