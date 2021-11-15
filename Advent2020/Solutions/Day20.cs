@@ -27,7 +27,7 @@ namespace Advent2020.Solutions
 
         public Tile[][] BuildMap(Tile[] tiles)
         {
-            Console.WriteLine(tiles.Count());
+            Console.WriteLine(tiles.Count() + " tiles");
             Dictionary<string, List<Tile>> matches = new();
 
 
@@ -50,22 +50,41 @@ namespace Advent2020.Solutions
             }
 
 
-            //loop through the tiles and fine one that has only one edge at teh top and left
-            Tile topLeft = null;
-            foreach(var tile in tiles)
+            Tile matchTile(Tile left, Tile above)
             {
-                for(int i=0; i< 8; i++)
+                //this is the top left corner
+                if(left == null && above == null)
                 {
-                    if(matches[tile.Top].Count == 1 && matches[tile.Left].Count == 1)
+                    foreach (var tile in tiles)
                     {
-                        topLeft = tile;
-                        break;
+                        for (var i = 0; i < 8; i++)
+                        {
+                            if (matches[tile.Top].Count == 1 && matches[tile.Left].Count == 1)
+                            {
+                                return tile;
+                            }
+                            tile.ChangePosition();
+                        }
                     }
-
-                    tile.ChangePosition();
+                } 
+                else
+                {
+                    var next = matches[left.Right].Single(tile => tile.Id != left.Id);
+                    Console.WriteLine(next.Id);
+                    
                 }
+                Tile result = null;
+                return result;
             }
+
+            //loop through the tiles and fine one that has only one edge at the top and left
+            var topLeft = matchTile(null, null);
+            //var next = matchTile(topLeft, null);
+
             Console.WriteLine(topLeft.Id);
+            Console.WriteLine(topLeft.Top);
+            Console.WriteLine(topLeft.Right);
+            Console.WriteLine(topLeft.Right);
             return null;
             
         }
