@@ -27,9 +27,7 @@ namespace Advent2020.Solutions
 
         public Tile[][] BuildMap(Tile[] tiles)
         {
-            Console.WriteLine(tiles.Count() + " tiles");
             Dictionary<string, List<Tile>> matches = new();
-
 
             foreach (var tile in tiles)
             {
@@ -46,9 +44,9 @@ namespace Advent2020.Solutions
                         matches[edge] = new List<Tile> { tile };
                     }
                 }
-                
             }
 
+            Tile getNeighbour(Tile tile, string edge) => matches[edge].SingleOrDefault(x => x.Id != tile.Id);
 
             Tile matchTile(Tile left, Tile above)
             {
@@ -69,23 +67,44 @@ namespace Advent2020.Solutions
                 } 
                 else
                 {
-                    var next = matches[left.Right].Single(tile => tile.Id != left.Id);
-                    Console.WriteLine(next.Id);
-                    
+                    var tile = above != null ? getNeighbour(above, above.Bottom) : getNeighbour(left, left.Right);
+
+                    while (true)
+                    {
+                        var topMatch = above == null ? matches[tile.Top].Count == 1 : tile.Top == above.Bottom;
+                        var leftMatch = left == null ? matches[tile.Left].Count == 1 : tile.Left == left.Right;
+
+                        if (topMatch && leftMatch)
+                        {
+                            return tile;
+                        }
+                        tile.ChangePosition();
+                    }
                 }
-                Tile result = null;
-                return result;
+                throw new InvalidOperationException();
             }
 
             //loop through the tiles and fine one that has only one edge at the top and left
             var topLeft = matchTile(null, null);
-            //var next = matchTile(topLeft, null);
+            var next = matchTile(topLeft, null);
 
-            Console.WriteLine(topLeft.Id);
-            Console.WriteLine(topLeft.Top);
-            Console.WriteLine(topLeft.Right);
-            Console.WriteLine(topLeft.Right);
-            return null;
+            var size = Convert.ToInt32(Math.Sqrt(tiles.Length));
+
+            Tile[][] result = new Tile[size][];
+
+            for(int i=0; i < size; i++)
+            {
+                result[i] = new Tile[size];
+
+                for (int j=0; j < size; j++)
+                {
+                    var left = j == 0 ? null : result[i][j - 1];
+                    var above = i == 0 ? null : result[i -1][j];
+                    result[i][j] = matchTile(left, above);
+                }
+            }
+
+            return result;
             
         }
 
@@ -94,8 +113,12 @@ namespace Advent2020.Solutions
             var tiles = ParseInput(input);
             var map = BuildMap(tiles);
 
-            
-            return 0L;
+            var a = map.First().First().Id;
+            var b = map.First().Last().Id;
+            var c = map.Last().First().Id;
+            var d = map.Last().Last().Id;
+
+            return a * b * c * d;
         }
 
         //Get all possible edges based on rotation / flip of tile
@@ -107,19 +130,17 @@ namespace Advent2020.Solutions
             
             return edges;
         }
-   
     }
 
     public class Tile
     {
-        public int Id { get; set; } 
+        public long Id { get; set; } 
         public string[] Image { get; set; } 
         
         public int Position { get; set; }
 
         public void ChangePosition()
         {   
-
             Position = (Position + 1) % 8;
         }
 
@@ -151,27 +172,29 @@ namespace Advent2020.Solutions
          */
         public string[] TransformedImage()
         {
-            switch (Position)
+            string[] rotateTimes(int x, string[] image)
             {
-                case 0:
-                    return Image;
-                case 1:
-                    return Rotate90(Image);
-                case 2:
-                    return Rotate90(Rotate90(Image));
-                case 3:
-                    return Rotate90(Rotate90(Rotate90(Image)));
-                case 4:
-                    return Flip(Image);
-                case 5:
-                    return Flip(Rotate90(Image));
-                case 6:
-                    return Flip(Rotate90(Rotate90(Image)));
-                case 7:
-                    return Flip(Rotate90(Rotate90(Rotate90(Image))));
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(Position));
+                for (int i = 0; i < x; i++)
+                {
+                    image = Rotate90(image);
+                }
+
+                return image;
             }
+            
+
+            return Position switch
+            {
+                0 => Image,
+                1 => rotateTimes(1, Image),
+                2 => rotateTimes(2, Image),
+                3 => rotateTimes(3, Image),
+                4 => Flip(Image),
+                5 => Flip(rotateTimes(1, Image)),
+                6 => Flip(rotateTimes(2, Image)),
+                7 => Flip(rotateTimes(3, Image)),
+                _ => throw new ArgumentOutOfRangeException(nameof(Position)),
+            };
         }
 
         public string Top 
