@@ -31,10 +31,9 @@ namespace Advent2020.Solutions
 
             foreach (var tile in tiles)
             {
-
                 foreach (var edge in GetEdgesForTile(tile))
                 {
-                
+
                     if (matches.ContainsKey(edge))
                     {
                         matches[edge].Add(tile);
@@ -46,12 +45,15 @@ namespace Advent2020.Solutions
                 }
             }
 
-            Tile getNeighbour(Tile tile, string edge) => matches[edge].SingleOrDefault(x => x.Id != tile.Id);
+            //foreach (var kvp in matches.OrderBy(x => x.Value.Count).ThenBy(x=>x.Key))
+            //{
+            //    Console.WriteLine($"{kvp.Key} : {kvp.Value.Count}");
+            //}
 
-            Tile matchTile(Tile left, Tile above)
+            Tile MatchTile(Tile left, Tile above)
             {
                 //this is the top left corner
-                if(left == null && above == null)
+                if (left == null && above == null)
                 {
                     foreach (var tile in tiles)
                     {
@@ -59,15 +61,19 @@ namespace Advent2020.Solutions
                         {
                             if (matches[tile.Top].Count == 1 && matches[tile.Left].Count == 1)
                             {
+                                //Console.WriteLine(string.Join(Environment.NewLine, tile.TransformedImage()));
                                 return tile;
                             }
                             tile.ChangePosition();
                         }
                     }
-                } 
+                }
                 else
                 {
-                    var tile = above != null ? getNeighbour(above, above.Bottom) : getNeighbour(left, left.Right);
+
+                    var tile = above != null ?
+                        matches[above.Bottom].SingleOrDefault(x => x.Id != above.Id) :
+                        matches[left.Right].SingleOrDefault(x => x.Id != left.Id);
 
                     while (true)
                     {
@@ -85,27 +91,24 @@ namespace Advent2020.Solutions
             }
 
             //loop through the tiles and fine one that has only one edge at the top and left
-            var topLeft = matchTile(null, null);
-            var next = matchTile(topLeft, null);
-
             var size = Convert.ToInt32(Math.Sqrt(tiles.Length));
 
-            Tile[][] result = new Tile[size][];
+            var result = new Tile[size][];
 
-            for(int i=0; i < size; i++)
+            for (var i = 0; i < size; i++)
             {
                 result[i] = new Tile[size];
 
-                for (int j=0; j < size; j++)
+                for (var j = 0; j < size; j++)
                 {
                     var left = j == 0 ? null : result[i][j - 1];
-                    var above = i == 0 ? null : result[i -1][j];
-                    result[i][j] = matchTile(left, above);
+                    var above = i == 0 ? null : result[i - 1][j];
+                    result[i][j] = MatchTile(left, above);
                 }
             }
 
             return result;
-            
+
         }
 
         internal long CountCorners(string input)
@@ -121,26 +124,112 @@ namespace Advent2020.Solutions
             return a * b * c * d;
         }
 
+        public Tile CombineMap(Tile[][] map)
+        {
+            var sb = new StringBuilder();
+
+            for (int i = 0; i < map.Length; i++)
+            {
+                for (int line = 0; line < 8; line++)
+                {
+                    for (int j = 0; j < map.Length; j++)
+                    {
+                        var tile = map[i][j];
+                        sb.Append(tile.InnerContent[line]);
+                    }
+                    sb.AppendLine();
+                }
+            }
+
+            //Console.WriteLine(sb.ToString());
+
+            return new Tile
+            {
+                Image = sb.ToString().Split(Environment.NewLine),
+                Position = 0
+            };
+
+        }
+
         //Get all possible edges based on rotation / flip of tile
         public List<string> GetEdgesForTile(Tile tile)
         {
             var edges = new List<string> { tile.Top, tile.Left, tile.Right, tile.Bottom };
 
             edges.AddRange(edges.Select(x => new string(x.Reverse().ToArray())).ToList());
-            
+
             return edges;
+        }
+
+        public int CountNessiesInTile(Tile bigTile)
+        {
+            var nessie = new string[]
+            {
+                "                  # ",
+                "#    ##    ##    ###",
+                " #  #  #  #  #  #   "
+            };
+
+            var seaMonsterWidth = 20;
+            var seaMonsterHeight = 3;
+            var seaMonsterTiles = 15;
+
+            bool IsSeaMonsterAt((int x, int y) location)
+            {
+                for (var y = 0; y < seaMonsterHeight; y++)
+                for (var x = 0; x < seaMonsterWidth; x++)
+                {
+                    if (nessie[y][x] == ' ') continue;
+                    if (bigTile.TransformedImage()[location.y + y][location.x + x] != '#') return false;
+                }
+
+                return true;
+            }
+            var size = bigTile.TransformedImage().Length;
+            var nessieLocations =
+                from x in Enumerable.Range(0, size - seaMonsterWidth)
+                from y in Enumerable.Range(0, size - seaMonsterHeight)
+                let location = (x,y)
+                where IsSeaMonsterAt(location)
+                select location;
+
+
+            return nessieLocations.Count();
+
+            
+
+
+
+        }
+
+        public int CalculateWaterRoughness(Tile tile)
+        {
+            var monsterCount = 0;
+            for (int i = 0; i < 8; i++)
+            {
+                var count = CountNessiesInTile(tile);
+                if(count > 0 )
+                {
+                    monsterCount = count;
+                    break;
+                }
+                tile.ChangePosition();
+            }
+
+            var result = tile.Picture.Count(x => x == '#') - (15 * monsterCount);
+            return result;
         }
     }
 
     public class Tile
     {
-        public long Id { get; set; } 
-        public string[] Image { get; set; } 
-        
-        public int Position { get; set; }
+        public long Id { get; set; }
+        public string[] Image { get; set; }
+
+        public int Position { get; set; } = 5;
 
         public void ChangePosition()
-        {   
+        {
             Position = (Position + 1) % 8;
         }
 
@@ -151,7 +240,7 @@ namespace Advent2020.Solutions
             for (int i = 0; i < original.Length; i++)
             {
                 var sb = new StringBuilder();
-                for(int j = original[i].Length - 1; j >= 0; j--)
+                for (int j = original[i].Length - 1; j >= 0; j--)
                 {
                     sb.Append(original[j][i]);
                 }
@@ -172,62 +261,51 @@ namespace Advent2020.Solutions
          */
         public string[] TransformedImage()
         {
-            string[] rotateTimes(int x, string[] image)
+            string[] Rotate(int times, string[] image)
             {
-                for (int i = 0; i < x; i++)
+                for (var i = 0; i < times; i++)
                 {
                     image = Rotate90(image);
                 }
 
                 return image;
             }
-            
+
 
             return Position switch
             {
                 0 => Image,
-                1 => rotateTimes(1, Image),
-                2 => rotateTimes(2, Image),
-                3 => rotateTimes(3, Image),
+                1 => Rotate(1, Image),
+                2 => Rotate(2, Image),
+                3 => Rotate(3, Image),
                 4 => Flip(Image),
-                5 => Flip(rotateTimes(1, Image)),
-                6 => Flip(rotateTimes(2, Image)),
-                7 => Flip(rotateTimes(3, Image)),
+                5 => Flip(Rotate(1, Image)),
+                6 => Flip(Rotate(2, Image)),
+                7 => Flip(Rotate(3, Image)),
                 _ => throw new ArgumentOutOfRangeException(nameof(Position)),
             };
         }
 
-        public string Top 
-        { 
-            get 
-            { 
-                return TransformedImage().First(); 
-            } 
-        }
+        public string Top => TransformedImage().First();
+        public string Bottom => TransformedImage().Last();
 
-        public string Bottom 
-        { 
-            get 
-            { 
-                return TransformedImage().Last(); 
-            } 
-        }
+        public string Left => string.Join("", TransformedImage().Select(x => x.First()));
 
-        public string Left 
-        { 
-            get 
-            { 
-                return string.Join("", TransformedImage().Select(x => x.First()).Reverse()); 
-            } 
-        }
+        public string Right => string.Join("", TransformedImage().Select(x => x.Last()));
 
-        public string Right
+        public string[] InnerContent
         {
-            get 
-            { 
-                return string.Join("", TransformedImage().Select(x => x.Last()).Reverse()); 
+            get
+            {
+                return TransformedImage().Skip(1).SkipLast(1).Select(x =>
+                {
+                    return new string(x.Skip(1).SkipLast(1).ToArray());
+                }).ToArray();
             }
         }
+
+        public string Picture => string.Join(Environment.NewLine, TransformedImage());
+
     }
 
 }

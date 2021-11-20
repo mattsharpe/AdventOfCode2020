@@ -241,5 +241,36 @@ Tile 3079:
         }
 
 
+        [TestMethod]
+        public void CalculateWaterRoughness_Sample()
+        {
+            //Nessie has 15 #
+            var tiles = _day20.ParseInput(_sample);
+
+            var map = _day20.BuildMap(tiles);
+
+            var bigTile = _day20.CombineMap(map);
+            var roughness = _day20.CalculateWaterRoughness(bigTile);
+
+            Assert.AreEqual(273, roughness);
+        }
+
+
+        [TestMethod]
+        public void CalculateWaterRoughness()
+        {
+            //Nessie has 15 #
+            var real = File.ReadAllText("Input/Day20.txt");
+            var tiles = _day20.ParseInput(real);
+
+            var map = _day20.BuildMap(tiles);
+
+            var bigTile = _day20.CombineMap(map);
+            var roughness = _day20.CalculateWaterRoughness(bigTile);
+
+            Assert.AreEqual(2424, roughness);
+            
+        }
+
     }
 }
