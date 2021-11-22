@@ -50,3 +50,4 @@ Temporary Items
 # .net directories
 bin
 obj
+/Advent2020.sln.DotSettings.user

@@ -45,11 +45,6 @@ namespace Advent2020.Solutions
                 }
             }
 
-            //foreach (var kvp in matches.OrderBy(x => x.Value.Count).ThenBy(x=>x.Key))
-            //{
-            //    Console.WriteLine($"{kvp.Key} : {kvp.Value.Count}");
-            //}
-
             Tile MatchTile(Tile left, Tile above)
             {
                 //this is the top left corner
@@ -61,7 +56,6 @@ namespace Advent2020.Solutions
                         {
                             if (matches[tile.Top].Count == 1 && matches[tile.Left].Count == 1)
                             {
-                                //Console.WriteLine(string.Join(Environment.NewLine, tile.TransformedImage()));
                                 return tile;
                             }
                             tile.ChangePosition();
@@ -128,7 +122,7 @@ namespace Advent2020.Solutions
         {
             var sb = new StringBuilder();
 
-            for (int i = 0; i < map.Length; i++)
+            for (var i = 0; i < map.Length; i++)
             {
                 for (int line = 0; line < 8; line++)
                 {
@@ -137,11 +131,10 @@ namespace Advent2020.Solutions
                         var tile = map[i][j];
                         sb.Append(tile.InnerContent[line]);
                     }
+
                     sb.AppendLine();
                 }
             }
-
-            //Console.WriteLine(sb.ToString());
 
             return new Tile
             {
@@ -163,49 +156,51 @@ namespace Advent2020.Solutions
 
         public int CountNessiesInTile(Tile bigTile)
         {
-            var nessie = new string[]
+            var monster = new[]
             {
                 "                  # ",
                 "#    ##    ##    ###",
                 " #  #  #  #  #  #   "
             };
 
-            var seaMonsterWidth = 20;
-            var seaMonsterHeight = 3;
-            var seaMonsterTiles = 15;
-
-            bool IsSeaMonsterAt((int x, int y) location)
-            {
-                for (var y = 0; y < seaMonsterHeight; y++)
-                for (var x = 0; x < seaMonsterWidth; x++)
-                {
-                    if (nessie[y][x] == ' ') continue;
-                    if (bigTile.TransformedImage()[location.y + y][location.x + x] != '#') return false;
-                }
-
-                return true;
-            }
-            var size = bigTile.TransformedImage().Length;
-            var nessieLocations =
-                from x in Enumerable.Range(0, size - seaMonsterWidth)
-                from y in Enumerable.Range(0, size - seaMonsterHeight)
-                let location = (x,y)
-                where IsSeaMonsterAt(location)
-                select location;
-
-
-            return nessieLocations.Count();
-
+            var width = 20;
+            var height = 3;
             
+            var size = bigTile.TransformedImage().Length;
+            var found = 0;
 
+            for (var y = 0; y < size - height - 1; y++)
+            {
+                for (var x = 0; x < size - width - 1; x++)
+                {
+                    var nessie = true;
+                    for (var monsterY = 0; monsterY < height; monsterY++)
+                    for (var monsterX = 0; monsterX < width; monsterX++)
+                    {
+                        //blank tiles in the monster mask can match anything
+                        if (monster[monsterY][monsterX] == ' ') continue;
+                        if (bigTile.Picture[monsterY + y][monsterX + x] != '#')
+                        {
+                            nessie = false;
+                            break;
+                        };
+                    }
 
+                    if (nessie)
+                    {
+                        found++;
+                    }
+                }
+            }
+
+            return found;
 
         }
 
         public int CalculateWaterRoughness(Tile tile)
         {
             var monsterCount = 0;
-            for (int i = 0; i < 8; i++)
+            for (var i = 0; i < 8; i++)
             {
                 var count = CountNessiesInTile(tile);
                 if(count > 0 )
@@ -216,7 +211,7 @@ namespace Advent2020.Solutions
                 tile.ChangePosition();
             }
 
-            var result = tile.Picture.Count(x => x == '#') - (15 * monsterCount);
+            var result = string.Join("",tile.Picture).Count(x => x == '#') - (15 * monsterCount);
             return result;
         }
     }
@@ -226,7 +221,7 @@ namespace Advent2020.Solutions
         public long Id { get; set; }
         public string[] Image { get; set; }
 
-        public int Position { get; set; } = 5;
+        public int Position { get; set; }
 
         public void ChangePosition()
         {
@@ -255,10 +250,6 @@ namespace Advent2020.Solutions
             return original.Select(x => new string(x.Reverse().ToArray())).ToArray();
         }
 
-        /* TODO: Tidy up
-         * If x > 3 call rotate and x-= 3
-         * Call rotate x times
-         */
         public string[] TransformedImage()
         {
             string[] Rotate(int times, string[] image)
@@ -272,7 +263,7 @@ namespace Advent2020.Solutions
             }
 
 
-            return Position switch
+            var result = Position switch
             {
                 0 => Image,
                 1 => Rotate(1, Image),
@@ -284,6 +275,10 @@ namespace Advent2020.Solutions
                 7 => Flip(Rotate(3, Image)),
                 _ => throw new ArgumentOutOfRangeException(nameof(Position)),
             };
+
+            Picture = result;
+
+            return result;
         }
 
         public string Top => TransformedImage().First();
@@ -293,19 +288,9 @@ namespace Advent2020.Solutions
 
         public string Right => string.Join("", TransformedImage().Select(x => x.Last()));
 
-        public string[] InnerContent
-        {
-            get
-            {
-                return TransformedImage().Skip(1).SkipLast(1).Select(x =>
-                {
-                    return new string(x.Skip(1).SkipLast(1).ToArray());
-                }).ToArray();
-            }
-        }
+        public string[] InnerContent => TransformedImage().Skip(1).SkipLast(1).Select(x => new string(x.Skip(1).SkipLast(1).ToArray())).ToArray();
 
-        public string Picture => string.Join(Environment.NewLine, TransformedImage());
-
+        public string[] Picture { get; private set; }
     }
 
 }

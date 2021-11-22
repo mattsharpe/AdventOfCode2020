@@ -1,9 +1,6 @@
 ﻿using Advent2020.Solutions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace Advent2020.Tests
 {
@@ -244,7 +241,6 @@ Tile 3079:
         [TestMethod]
         public void CalculateWaterRoughness_Sample()
         {
-            //Nessie has 15 #
             var tiles = _day20.ParseInput(_sample);
 
             var map = _day20.BuildMap(tiles);
@@ -259,7 +255,6 @@ Tile 3079:
         [TestMethod]
         public void CalculateWaterRoughness()
         {
-            //Nessie has 15 #
             var real = File.ReadAllText("Input/Day20.txt");
             var tiles = _day20.ParseInput(real);
 
