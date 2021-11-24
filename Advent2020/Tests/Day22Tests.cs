@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Advent2020.Solutions;
+using System.IO;
 
 namespace Advent2020.Tests
 {
@@ -36,8 +37,15 @@ namespace Advent2020.Tests
         {
             var result = _day22.CalculateWinningScore(_sample);
 
-            Assert.AreEqual(306, result);
+            Assert.AreEqual(306, result); 
+        }
 
+        [TestMethod]
+        public void Part1()
+        {
+            var result = _day22.CalculateWinningScore(File.ReadAllLines("Input/Day22.txt"));
+
+            Assert.AreEqual(35818, result);
         }
     }
 }
