@@ -47,5 +47,41 @@ namespace Advent2020.Tests
 
             Assert.AreEqual(35818, result);
         }
+
+        [TestMethod]
+        public void LoopExits()
+        {
+            var input = new[]
+            {
+                "Player 1:",
+                "43",
+                "19",
+                "",
+                "Player 2:",
+                "2",
+                "29",
+                "14",
+            };
+
+            var result = _day22.CalculateWinningScoreOfRecursiveGame(input);
+
+            Assert.AreEqual(105, result);
+        }
+
+        [TestMethod]
+        public void RecursiveGameSample()
+        {
+            int result = _day22.CalculateWinningScoreOfRecursiveGame(_sample);
+
+            Assert.AreEqual(291, result);
+        }
+
+        [TestMethod]
+        public void RecursiveGame()
+        {
+            int result = _day22.CalculateWinningScoreOfRecursiveGame(File.ReadAllLines("Input/Day22.txt"));
+
+            Assert.AreEqual(34771, result);
+        }
     }
 }
