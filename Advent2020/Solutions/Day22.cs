@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Advent2020.Solutions
 {
@@ -42,13 +43,68 @@ namespace Advent2020.Solutions
         {
             var game = ParseInput(input);
 
-
             //play game
-            game.PlayerOneWinsRecursiveRound(game);
-            
-            
+            PlayerOneWinsRecursiveRound(game);
 
             return CalculateScore(game.Winner);
+        }
+
+        public bool PlayerOneWinsRecursiveRound(Game game)
+        {
+            var knownStates = new HashSet<string>();
+
+            while (!game.Complete)
+            {
+                //game.Print();
+                var state = string.Join(",", game.Deck1) + "/" + string.Join(",", game.Deck2);
+                if (knownStates.Contains(state))
+                {
+                    return true; //player one wins
+                }
+
+
+                knownStates.Add(state);
+
+                var one = game.Deck1.Dequeue();
+                var two = game.Deck2.Dequeue();
+
+                //Console.WriteLine($"Player 1 plays: {one}");
+                //Console.WriteLine($"Player 2 plays: {two}");
+                //Console.WriteLine();
+
+                var oneCanPlayOn = one <= game.Deck1.Count;
+                var twoCanPlayOn = two <= game.Deck2.Count;
+
+                bool playerOneWins;
+
+                if (!oneCanPlayOn || !twoCanPlayOn)
+                {
+                    playerOneWins = one > two;
+                }
+                else
+                {
+                    var recursiveGame = new Game
+                    {
+                        Deck1 = new Queue<int>(game.Deck1.Take(one)),
+                        Deck2 = new Queue<int>(game.Deck2.Take(two)),
+                    };
+                    playerOneWins = PlayerOneWinsRecursiveRound(recursiveGame);
+                }
+
+                //winners card, then losers, regardless of number
+                if (playerOneWins)
+                {
+                    game.Deck1.Enqueue(one);
+                    game.Deck1.Enqueue(two);
+                }
+                else
+                {
+                    game.Deck2.Enqueue(two);
+                    game.Deck2.Enqueue(one);
+                }
+            }
+
+            return game.Deck1.Count > 0;
         }
     }
 
@@ -83,67 +139,7 @@ namespace Advent2020.Solutions
                 Deck2.Enqueue(one);
             }
         }
-        public static int count = 0;
-        public bool PlayerOneWinsRecursiveRound(Game game)
-        {
-            var knownStates = new HashSet<string>();
-
-            while (!game.Complete)
-            {
-                count++;
-                //game.Print();
-
-                if (knownStates.Contains(game.State))
-                {
-                    return true; //player one wins
-                }
-
-
-                knownStates.Add(game.State);
-
-                var one = game.Deck1.Dequeue();
-                var two = game.Deck2.Dequeue();
-
-                //Console.WriteLine($"Player 1 plays: {one}");
-                //Console.WriteLine($"Player 2 plays: {two}");
-                //Console.WriteLine();
-
-                var oneCanPlayOn = one <= game.Deck1.Count();
-                var twoCanPlayOn = two <= game.Deck2.Count();
-
-                bool playerOneWins;
-
-                if (!oneCanPlayOn || !twoCanPlayOn)
-                {
-                    playerOneWins = one > two;
-                } 
-                else
-                {
-                    var recursiveGame = new Game
-                    {
-                        Deck1 = new Queue<int>(game.Deck1.Take(one)),
-                        Deck2 = new Queue<int>(game.Deck2.Take(two)),
-                    };
-                    playerOneWins = PlayerOneWinsRecursiveRound(recursiveGame);
-                }
-
-                //winners card, then losers, regardless of number
-                if (playerOneWins)
-                {
-                    game.Deck1.Enqueue(one);
-                    game.Deck1.Enqueue(two);
-                }
-                else
-                {
-                    game.Deck2.Enqueue(two);
-                    game.Deck2.Enqueue(one);
-                }   
-            }
-
-            return game.Deck1.Count > 0;
-        }
-
-        public string State => $"{string.Join(",", Deck1)}/{string.Join(",", Deck2)}";
+        
     }
 
 }
