@@ -1,6 +1,5 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Advent2020.Solutions;
-using System.IO;
 
 namespace Advent2020.Tests
 {
@@ -24,5 +23,12 @@ namespace Advent2020.Tests
             Assert.AreEqual("67384529", result); 
         }
 
+        [TestMethod]
+        public void Part1()
+        {
+            var result = _day23.OrderAfterCup1("463528179");
+
+            Assert.AreEqual("52937846", result);
+        }
     }
 }
