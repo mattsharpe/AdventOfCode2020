@@ -30,5 +30,20 @@ namespace Advent2020.Tests
 
             Assert.AreEqual("52937846", result);
         }
+
+        [TestMethod]
+        public void Part2_Sample()
+        {
+            long result = _day23.Part2("389125467");
+            Assert.AreEqual(149245887792, result);
+        }
+
+
+        [TestMethod]
+        public void Part2()
+        {
+            long result = _day23.Part2("463528179");
+            Assert.AreEqual(8456532414, result);
+        }
     }
 }
